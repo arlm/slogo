@@ -31,6 +31,7 @@ namespace SLogoC
                 Console.WriteLine("--width=x    Where x is a number that define canvas width");
                 Console.WriteLine("--height=y   Where y is a number that define canvas height");
                 Console.WriteLine("--output=z   Where z is a a name of bitmap filename where result will be saved");
+                Console.WriteLine("             or exe file where compiled Logo program will saved");
                 Console.WriteLine("--run=c      Where c is a code that will be executed");
 
                 Console.WriteLine("\nFor example:");
@@ -50,39 +51,57 @@ namespace SLogoC
                     if (!String.IsNullOrEmpty(lgoRuntime.cs_source_file))
                         System.IO.File.WriteAllText(lgoRuntime.cs_source_file, cs_source_code);
 
-                    InitializeCanvas();
-                    drawingSurface.DrawImage(savedImage, 0, 0);
-
-                    errors = lgoRuntime.RunCs(cs_source_code);
-                    if (String.IsNullOrEmpty(errors))
+                    if (lgoRuntime.generate_exe)
                     {
-                        savedImage = new Bitmap(Image);
-                        lgoRuntime.turtle.Draw();
+                        errors = lgoRuntime.MakeExe(cs_source_code, lgoRuntime.result_file);
 
-                        if (!String.IsNullOrEmpty(lgoRuntime.result_file))
+                        if (String.IsNullOrEmpty(errors))
                         {
-                            string extension = System.IO.Path.GetExtension(lgoRuntime.result_file);
-                            System.Drawing.Imaging.ImageFormat imgf = System.Drawing.Imaging.ImageFormat.Bmp;
-                            if (!extension.ToLower().Equals(".bmp"))
-                            {
-                                if (extension.ToLower().Equals(".png"))
-                                    imgf = System.Drawing.Imaging.ImageFormat.Png;
-                                else if (extension.ToLower().Equals(".jpg"))
-                                    imgf = System.Drawing.Imaging.ImageFormat.Jpeg;
-                                else if (extension.ToLower().Equals(".jpeg"))
-                                    imgf = System.Drawing.Imaging.ImageFormat.Jpeg;
-                                else if (extension.ToLower().Equals(".gif"))
-                                    imgf = System.Drawing.Imaging.ImageFormat.Gif;
-                            }
-                            savedImage.Save(lgoRuntime.result_file, imgf);
+                            Console.WriteLine("Done");
+                            return 0;
                         }
-                        Console.WriteLine("Done");  
-                        return 0;
+                        else
+                        {
+                            Console.WriteLine(errors);  // Errors 
+                            return -1;
+                        }
                     }
                     else
                     {
-                        Console.WriteLine(errors);  // Errors 
-                        return -1;
+                        InitializeCanvas();
+                        drawingSurface.DrawImage(savedImage, 0, 0);
+
+                        errors = lgoRuntime.RunCs(cs_source_code);
+                        if (String.IsNullOrEmpty(errors))
+                        {
+                            savedImage = new Bitmap(Image);
+                            lgoRuntime.turtle.Draw();
+
+                            if (!String.IsNullOrEmpty(lgoRuntime.result_file))
+                            {
+                                string extension = System.IO.Path.GetExtension(lgoRuntime.result_file);
+                                System.Drawing.Imaging.ImageFormat imgf = System.Drawing.Imaging.ImageFormat.Bmp;
+                                if (!extension.ToLower().Equals(".bmp"))
+                                {
+                                    if (extension.ToLower().Equals(".png"))
+                                        imgf = System.Drawing.Imaging.ImageFormat.Png;
+                                    else if (extension.ToLower().Equals(".jpg"))
+                                        imgf = System.Drawing.Imaging.ImageFormat.Jpeg;
+                                    else if (extension.ToLower().Equals(".jpeg"))
+                                        imgf = System.Drawing.Imaging.ImageFormat.Jpeg;
+                                    else if (extension.ToLower().Equals(".gif"))
+                                        imgf = System.Drawing.Imaging.ImageFormat.Gif;
+                                }
+                                savedImage.Save(lgoRuntime.result_file, imgf);
+                            }
+                            Console.WriteLine("Done");
+                            return 0;
+                        }
+                        else
+                        {
+                            Console.WriteLine(errors);  // Errors 
+                            return -1;
+                        }
                     }
                 }
                 else

@@ -33,6 +33,8 @@ namespace SLogoRuntime
         public int width = 1000;
         public int height = 1000;
 
+        public bool generate_exe = false;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -52,6 +54,9 @@ namespace SLogoRuntime
                 if (arr[0].Equals("--output"))
                 {
                     result_file = arr[1];
+                    generate_exe = Path.GetExtension(this.result_file)
+                                       .ToLower()
+                                       .Equals(".exe");
                 }
                 else if (arr[0].Equals("--run"))
                 {
@@ -165,6 +170,56 @@ namespace SLogoRuntime
                     _expressionError += error.ErrorText + "\n";
 
                 return _expressionError;
+            }
+        }
+
+        public string MakeExe(string CScode, string exePath)
+        {
+            try
+            {
+                string template;
+
+                //string[] gg = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+
+                using (Stream stream = Assembly.GetExecutingAssembly()
+                                               .GetManifestResourceStream("SLogoRuntime.ExeSkeleton.cs"))
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        template = reader.ReadToEnd();
+                    }
+                }
+
+                template = template.Replace("/*Width*/",  width.ToString());
+                template = template.Replace("/*Height*/", height.ToString());
+                template = template.Replace("/*CompiledCode*/", CScode);
+
+                CompilerParameters compilerparams = new CompilerParameters();
+                compilerparams.GenerateExecutable = true;
+                compilerparams.GenerateInMemory = false;
+                compilerparams.OutputAssembly = exePath;
+                compilerparams.IncludeDebugInformation = false;
+                compilerparams.ReferencedAssemblies.Add("System.dll");
+                compilerparams.ReferencedAssemblies.Add("System.Drawing.dll");
+                compilerparams.ReferencedAssemblies.Add("System.Windows.Forms.dll");
+                compilerparams.ReferencedAssemblies.Add("TurtleRuntime.dll");
+
+                CompilerResults results = compiler.CompileAssemblyFromSource(compilerparams, template);
+
+                if (results.Errors.HasErrors)
+                {
+                    string _expressionError = "";
+                    foreach (System.CodeDom.Compiler.CompilerError error in results.Errors)
+                        _expressionError += error.ErrorText + "\n";
+
+                    return _expressionError;
+                }
+
+                return null;
+            }
+            catch  (Exception ex)
+            {
+                return ex.Message;
             }
         }
     }
