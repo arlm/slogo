@@ -16,6 +16,8 @@ namespace SLogoC
 
         static int Main(string[] args)
         {
+            DateTime start = DateTime.Now;
+
             lgoRuntime = new SLogoRuntime.Runtime(args);
 
             if (lgoRuntime.show_help)
@@ -57,7 +59,7 @@ namespace SLogoC
 
                         if (String.IsNullOrEmpty(errors))
                         {
-                            Console.WriteLine("Done");
+                            Console.WriteLine("Done in " + elapsedTime(start));
                             return 0;
                         }
                         else
@@ -94,7 +96,7 @@ namespace SLogoC
                                 }
                                 savedImage.Save(lgoRuntime.result_file, imgf);
                             }
-                            Console.WriteLine("Done");
+                            Console.WriteLine("Done in " + elapsedTime(start));
                             return 0;
                         }
                         else
@@ -115,6 +117,32 @@ namespace SLogoC
                 Console.WriteLine("Invalid or missing LGO file");  // Errors 
                 return -1;
             }
+
+        }
+
+        static string elapsedTime(DateTime start)
+        {
+            DateTime end = DateTime.Now;
+            TimeSpan span = end - start;
+            List<string> lst = new List<string>();
+            
+            if(span.Duration().Days > 0)
+                lst.Add( String.Format("{0:0} day{1}, ", span.Days, span.Days == 1 ? String.Empty : "s"));
+            if( span.Duration().Hours > 0)
+                lst.Add ( String.Format("{0:0} hour{1}, ", span.Hours, span.Hours == 1 ? String.Empty : "s"));
+            if( span.Duration().Minutes > 0 )
+                lst.Add( String.Format("{0:0} minute{1}, ", span.Minutes, span.Minutes == 1 ? String.Empty : "s"));
+            if( span.Duration().Seconds > 0 )
+                lst.Add(string.Format("{0:0} second{1}", span.Seconds, span.Seconds == 1 ? String.Empty : "s"));
+            if (span.Duration().Milliseconds > 0)
+                lst.Add(string.Format("{0:0} milisecond{1}", span.Milliseconds, span.Milliseconds == 1 ? String.Empty : "s"));
+
+            string retval = String.Join(", ", lst.ToArray());
+
+            if (string.IsNullOrEmpty(retval))
+                retval = "0 seconds";
+
+            return retval;
 
         }
 
