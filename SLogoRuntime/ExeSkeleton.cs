@@ -34,6 +34,8 @@ public class LogoForm : System.Windows.Forms.Form
 		drawingSurface = System.Drawing.Graphics.FromImage(this.pictureBox.Image);
 		drawingSurface.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 		turtle = new TurtleRuntime.Turtle(drawingSurface);
+		turtle.Reset();
+		turtle.Draw();
 	}
 	
 	private void LogoForm_Load(object sender, System.EventArgs e)
